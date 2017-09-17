@@ -4,7 +4,7 @@ import Base: size, ndims, eltype, getindex, setindex!
 
 import Base.Broadcast: _broadcast_eltype, broadcast_indices, broadcast!
 
-export multi_broadcast
+export multi_broadcast, @multi
 
 """
     TupleofArrays(arrays...)
@@ -58,6 +58,33 @@ function multi_broadcast(f, args...)
     toa = TupleofArrays(T, shape)
     broadcast!(f, toa, args...)
     toa.arrays
+end
+
+"""
+    @multi f.(args...)
+
+Replaces the outermost broadcast in the expanded expression with
+`multi_broadcast`, which collects the results in multiple values.
+
+```jldoctest
+julia> f(x, y) = x+y, x*y
+f (generic function with 1 method)
+julia> a, b = @multi f.([1, 2], [3, 5]);
+julia> a
+2-element Array{Int64,1}:
+ 4
+ 7
+julia> b
+2-element Array{Int64,1}:
+  3
+ 10
+```
+"""
+macro multi(ex::Expr)
+    ee = expand(ex)      # regularize broadcast(f, ...) and f.(...), is this OK?
+    @assert(ee.head == :call && ee.args[1] == GlobalRef(Base, :broadcast),
+            "@multi only works on broadcast calls")
+    :(multi_broadcast($(map(esc, ee.args[2:end])...)))
 end
 
 end # module

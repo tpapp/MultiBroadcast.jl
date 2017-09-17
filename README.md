@@ -7,7 +7,7 @@
 
 ## Introduction
 
-This is an experimental Julia package that explores broadcasting functions
+This is an **experimental** Julia package that explores broadcasting functions
 with multiple values (cf
 [#23734](https://github.com/JuliaLang/julia/issues/23734)). The only
 exported function is `multi_broadcast`, which is best explained with
@@ -19,8 +19,12 @@ a, b = multi_broadcast(f, 1:10)
 a == collect(2:11)
 b == collect(2:2:20)
 ```
+There is a convenience syntax for this with the `@multi` macro:
+```julia
+@multi f.(1:10)
+```
 
-It also extends `broadcast!`, so if you preallocate for the output, you can do
+The package also extends `broadcast!`, so if you preallocate for the output, you can do
 ```julia
 x = 1:10
 a = similar(BitArray, x)

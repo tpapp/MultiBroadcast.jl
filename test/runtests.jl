@@ -42,3 +42,17 @@ end
     @test b == x.+2.0
     @test c == isodd.(x)
 end
+
+@testset "multibroadcast error" begin
+    f(n) = ntuple(identity, n)
+    @test_throws AssertionError multi_broadcast(f, [1:3])
+end
+
+@testset "multi" begin
+    x = 1:3
+    y = 4:6
+    f(x, y) = x+y, x-y
+    a, b = @multi f.(x, y)
+    @test a ≅ x .+ y
+    @test b ≅ x .- y
+end
