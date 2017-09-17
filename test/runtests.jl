@@ -44,9 +44,9 @@ end
 end
 
 @testset "multibroadcast error" begin
-    @test_throws AssertionError multi_broadcast(identity, [1:3])
+    @test_throws AssertionError multi_broadcast(identity, 1:3)
     f(n) = ntuple(identity, n)
-    @test_throws AssertionError multi_broadcast(f, [1:3])
+    @test_throws AssertionError multi_broadcast(f, 1:3)
 end
 
 @testset "multi" begin
