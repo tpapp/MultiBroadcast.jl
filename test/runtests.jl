@@ -54,6 +54,6 @@ end
     y = 4:6
     f(x, y) = x+y, x-y
     a, b = @multi f.(x, y)
-    @test a ≅ x .+ y
-    @test b ≅ x .- y
+    @test a ≅ collect(x .+ y)
+    @test b ≅ collect(x .- y)
 end
