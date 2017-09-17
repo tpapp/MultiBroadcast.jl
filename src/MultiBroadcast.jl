@@ -1,6 +1,6 @@
 module MultiBroadcast
 
-import Base: size, ndims, eltype, getindex, setindex!, similar
+import Base: size, ndims, eltype, getindex, setindex!
 
 import Base.Broadcast: _broadcast_eltype, broadcast_indices, broadcast!
 
@@ -37,8 +37,12 @@ eltype(toa::TupleofArrays{S,T,N}) where {S,T,N} = T
 dims(toa::TupleofArrays{S,T,N}) where {S,T,N} = N
 setindex!(toa::TupleofArrays, value, ixs...) =
     map((a,v)->setindex!(a, v, ixs...), toa.arrays, value)
-similar(::Type{TupleofArrays}, eltype, shape) =
-    TupleofArrays(map(t->similar(Array{t}, shape), tuple(eltype.parameters...)))
+
+function TupleofArrays(eltype, shape, booltobits = true)
+    arraytype(T) = booltobits && T == Bool ? BitArray : Array{T}
+    TupleofArrays(map(T -> similar(arraytype(T), shape),
+                      tuple(eltype.parameters...)))
+end
 
 function broadcast!(f, result::NTuple{N,AbstractArray}, args...) where N
     toa = TupleofArrays(result)
@@ -48,8 +52,10 @@ end
 
 function multi_broadcast(f, args...)
     T = _broadcast_eltype(f, args...)
+    @assert(T <: Tuple && !(T.parameters[end] <: Vararg), # FIXME kludge
+            "The inferred return type is not a fixed-length tuple.")
     shape = broadcast_indices(args...)
-    toa = similar(TupleofArrays, T, shape)
+    toa = TupleofArrays(T, shape)
     broadcast!(f, toa, args...)
     toa.arrays
 end
