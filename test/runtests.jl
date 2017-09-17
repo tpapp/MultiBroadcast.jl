@@ -51,7 +51,7 @@ end
 
 @testset "multi" begin
     x = 1:3
-    y = 4:6
+    y = 5:2:9
     f(x, y) = x+y, x-y
     a, b = @multi f.(x, y)
     @test a ≅ collect(x .+ y)
