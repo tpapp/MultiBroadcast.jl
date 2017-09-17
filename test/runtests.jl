@@ -30,3 +30,15 @@ end
     @test a ≅ (x .== y)
     @test b ≅ (x .+ y)
 end
+
+@testset "broadcast! with multiple values" begin
+    x = reshape(1:50, 2, 5, :)
+    f(x) = x+1, x+2, isodd(x)
+    a = similar(x)
+    b = similar(x, Float64)     # conversion
+    c = similar(BitArray, indices(x))
+    a, b, c .= f.(x)
+    @test a == x.+1
+    @test b == x.+2.0
+    @test c == isodd.(x)
+end
